@@ -1,18 +1,36 @@
-const express = require('express')
-const routerProductos = require('./routes/routerProduct.js')
-const routerCarrito = require('./routes/routerCarrito.js')
+const express = require('express');
+
+//Utilizamos Mongo DB
+const productosMongoRouter = require('./routers/mongo/routeProductsM');
+const carritoMongoRouter = require('./routers/mongo/routeCartM');
+
+//Utilizamos Firebase
+const productosFbRouter = require('./routers/firebase/routeProductsF');
+const carritoFirebaseRouter = require('./routers/firebase/routeCartF');
 
 const app = express();
+const port = process.env.port || 8080;
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 
-app.use('/api/productos', routerProductos)
-app.use('/api/carrito', routerCarrito)
+//Mongo DB
+app.use('/api/mongo/productos', productosMongoRouter);
+app.use('/api/mongo/carrito', carritoMongoRouter);
 
-//server
-const PORT =  8080;
+//Firebase
+app.use('/api/firebase/productos', productosFbRouter);
+app.use('/api/firebase/carrito', carritoFirebaseRouter);
 
-const server = app.listen(PORT, () => {
-    console.log(`Servidor http escuchando en el puerto ${server.address().port}`);
+
+app.use((req, res) => {
+    res.status(404).json({
+        error: -2,
+        descripcion: `ruta '${req.originalUrl}' método '${req.method}' no implementada`,
+    });
+});
+
+
+app.listen(port, () => {
+    console.log(`RUN http://localhost:${port}`);
 });
